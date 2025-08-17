@@ -1,6 +1,6 @@
 // src/services/authService.ts
 // const API_URL = 'http://localhost:5001/api';  Replace with your actual API URL
-const API_URL = 'https://exam-grader-backend.onrender.com/api'
+const API_URL = 'https://exam-grader-backend.onrender.com'
 
 export const signup = async (userData: {
   name: string;
@@ -36,7 +36,7 @@ export const login = async (credentials: {
   role: string;
   rememberMe?: boolean;
 }) => {
-  const response = await fetch(`${API_URL}/auth/login`, {
+  const response = await fetch(`${API_URL}/api/auth/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
