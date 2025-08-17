@@ -14,7 +14,6 @@ const LoginPage = () => {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [apiError, setApiError] = useState('');
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [rememberMe, setRememberMe] = useState(false);
 
@@ -71,7 +70,6 @@ const LoginPage = () => {
   }
   
   setIsSubmitting(true);
-  setApiError('');
   
   try {
     const credentials = {
@@ -152,7 +150,6 @@ const LoginPage = () => {
       }
     }
     
-    setApiError(errorMessage);
     toast.error(errorMessage, {
       duration: 4000,
       position: 'top-center',
@@ -379,7 +376,7 @@ const LoginPage = () => {
             {/* Sign Up Link */}
             <div className="text-center pt-4 border-t border-gray-100">
               <p className="text-gray-600 text-sm">
-                Don't have an account?{' '}
+                Don&apos;t have an account?{' '}
                 <Link href="/signup" className="text-blue-600 hover:text-blue-800 font-semibold hover:underline transition-colors">
                   Create one here
                 </Link>
