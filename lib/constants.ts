@@ -1,0 +1,1 @@
+export const core_url = 'http://localhost:5500';
