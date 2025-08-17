@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { User, BookOpen, Calendar, Award, Bell, Settings, ChevronRight, GraduationCap, AlertCircle, Loader2, LogOut } from 'lucide-react';
 import Link from 'next/link';
@@ -27,77 +27,87 @@ const StudentDashboard: React.FC = () => {
     email: '',
     role: '',
     department: ''
-  })
-  const router = useRouter()
+  });
+  const router = useRouter();
 
-  const handleLogout = () => {
+  // Wrap fetchProfile in useCallback to avoid recreating it on every render
+  const fetchProfile = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        console.log('No token found, redirecting to login');
+        router.push('/login');
+        return;
+      }
+
+      // Add cache: 'no-store' to prevent caching
+      const response = await fetch('http://localhost:5001/api/auth/me', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        cache: 'no-store' // This fixes the Next.js caching warning
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          console.log('Token invalid, clearing storage and redirecting');
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          router.push('/login');
+          return;
+        }
+        throw new Error(`Failed to fetch profile: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Profile data received:', data);
+      
+      const userData = data.user || data;
+      
+      setUser(userData);
+      setFormData({
+        name: userData.name || '',
+        email: userData.email || '',
+        role: userData.role || '',
+        department: userData.department || ''
+      });
+      
+      localStorage.setItem('user', JSON.stringify(userData));
+      
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      setError(error instanceof Error ? error.message : 'Failed to load profile');
+      
+      if (error instanceof Error && error.message.includes('401')) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        router.push('/login');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [router]);
+
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
+
+
+   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     router.push('/login');
   };
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        setLoading(true);
-        const token = localStorage.getItem('token');
-        
-        if (!token) {
-          console.log('No token found, redirecting to login');
-          router.push('/login');
-          return;
-        }
-
-        const response = await fetch('http://localhost:5001/api/auth/me', {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (!response.ok) {
-          if (response.status === 401) {
-            console.log('Token invalid, clearing storage and redirecting');
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            router.push('/login');
-            return;
-          }
-          throw new Error(`Failed to fetch profile: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log('Profile data received:', data);
-        
-        const userData = data.user || data;
-        
-        setUser(userData);
-        setFormData({
-          name: userData.name || '',
-          email: userData.email || '',
-          role: userData.role || '',
-          department: userData.department || ''
-        });
-        
-        localStorage.setItem('user', JSON.stringify(userData));
-        
-      } catch (error) {
-        console.error('Error fetching profile:', error);
-        setError(error instanceof Error ? error.message : 'Failed to load profile');
-        
-        if (error instanceof Error && error.message.includes('401')) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          router.push('/login');
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
+  // Implement retry function
+  const retryFetch = () => {
     fetchProfile();
-  }, [router]);
+  };
 
   const getDepartmentAbbreviation = (department: string): string => {
     if (!department) return 'N/A';
@@ -139,7 +149,6 @@ const StudentDashboard: React.FC = () => {
       </div>
     );
   }
-
   if (!user) {
     return (
       <div className="min-h-screen bg-blue-50 flex items-center justify-center">
