@@ -93,12 +93,12 @@ const SignupPage = () => {
     return { label: 'Strong', color: 'bg-green-500' };
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const { name, value } = e.target;
+  setFormData(prev => ({
+    ...prev,
+    [name]: value
+  }));
     
     // Real-time validation
     if (touched[name]) {
@@ -117,10 +117,10 @@ const SignupPage = () => {
     }
   };
 
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    const { name } = e.target;
-    setTouched(prev => ({ ...prev, [name]: true }));
-  };
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const { name } = e.target;
+  setTouched(prev => ({ ...prev, [name]: true }));
+};
 
  const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
