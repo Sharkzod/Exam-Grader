@@ -4,9 +4,9 @@ import { FeaturesSection } from '@/components/FeatureSection';
 import { StatsSection } from '@/components/StatsSection';
 import Link from 'next/link';
 
-const HomePage: React.FC<NavigationBarProps> = ({ setCurrentPage }) => (
+const HomePage = () => (
   <div className="min-h-screen bg-gray-50">
-    <HeroSection setCurrentPage={setCurrentPage} />
+    <HeroSection />
     <FeaturesSection />
     <StatsSection />
     
