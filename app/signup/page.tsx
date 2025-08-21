@@ -124,7 +124,12 @@ const SignupPage = () => {
 
  const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
-
+  
+  if (!validateForm()) {
+    toast.error('Please fix the form errors before submitting');
+    return;
+  }
+  
   setIsSubmitting(true);
   setApiError('');
   
@@ -672,9 +677,9 @@ const SignupPage = () => {
               <button
                 type="button"
                 onClick={handleSubmit}
-                disabled={isSubmitting}
+                disabled={isSubmitting || !isFormValid()}
                 className={`w-full h-14 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-xl shadow-lg transition-all duration-300 flex items-center justify-center gap-3 transform hover:scale-[1.02] active:scale-[0.98] ${
-                  isSubmitting
+                  isSubmitting || !isFormValid() 
                     ? 'opacity-50 cursor-not-allowed hover:scale-100' 
                     : 'hover:shadow-xl'
                 }`}
