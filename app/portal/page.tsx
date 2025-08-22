@@ -194,7 +194,7 @@ const StudentResultsPage = ({
   const [studentInfo, setStudentInfo] = useState<{name: string, level: string} | null>(null);
 
   // API Configuration
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://exam-grader-bot.onrender.com';
 
   // Fetch student results
   const fetchStudentResults = async () => {
