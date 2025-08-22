@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { User, BookOpen, Calendar, Award, Bell, Settings, ChevronRight, GraduationCap, AlertCircle, Loader2, LogOut } from 'lucide-react';
 import Link from 'next/link';
+import { API_URL } from '@/lib/constants';
 
 interface StudentUser {
   id: string;
@@ -44,7 +45,7 @@ const StudentDashboard: React.FC = () => {
       }
 
       // Add cache: 'no-store' to prevent caching
-      const response = await fetch('http://localhost:5001/api/auth/me', {
+      const response = await fetch(`${API_URL}/api/auth/me`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
