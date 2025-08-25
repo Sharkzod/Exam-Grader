@@ -1,6 +1,6 @@
 // src/services/authService.ts
-const API_URL = 'http://localhost:5001'; 
-// const API_URL = 'https://exam-grader-backend.onrender.com'
+// const API_URL = 'http://localhost:5001'; 
+const API_URL = 'https://exam-grader-backend.onrender.com'
 
 export const signup = async (userData: {
   name: string;
