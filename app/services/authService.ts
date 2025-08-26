@@ -33,17 +33,15 @@ export const signup = async (userData: {
 export const login = async (credentials: {
   email: string;
   password: string;
-  role: string;
   rememberMe?: boolean;
 }) => {
   const response = await fetch(`${API_URL}/api/auth/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      // Don't include Authorization header for login
     },
     body: JSON.stringify(credentials),
-    credentials: 'include', // For cookies if using them
+    credentials: 'include',
   });
 
   if (!response.ok) {
