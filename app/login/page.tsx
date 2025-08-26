@@ -12,7 +12,8 @@ const LoginPage = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    role: 'lecturer' // Default role
+    // Keep role for UI purposes, but don't use it for validation
+    role: 'lecturer' 
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -63,98 +64,102 @@ const LoginPage = () => {
     setTouched(prev => ({ ...prev, [name]: true }));
   };
 
- const handleSubmit = async () => {
-  if (!validateForm()) {
-    toast.error('Please fill in all fields correctly', {
-      position: 'top-center'
-    });
-    return;
-  }
-  
-  setIsSubmitting(true);
-  
-  try {
-    const credentials = {
-      email: formData.email,
-      password: formData.password,
-      role: formData.role,
-      // Remove role from credentials - backend doesn't need it
-      rememberMe
-    };
-
-    const response = await login(credentials);
-    
-    console.log('Login successful:', response);
-    
-    if (!response.token) {
-      throw new Error('No authentication token received');
-    }
-
-    // Get the user's actual role from backend
-    const userRole = response.user?.role || response.role;
-    if (!userRole) {
-      throw new Error('No role information received');
-    }
-
-    // Store user data and token
-    localStorage.setItem('token', response.token);
-    
-    if (response.user) {
-      localStorage.setItem('user', JSON.stringify(response.user));
+  // FIXED: Remove role validation entirely
+  const handleSubmit = async () => {
+    if (!validateForm()) {
+      toast.error('Please fill in all fields correctly', {
+        position: 'top-center'
+      });
+      return;
     }
     
-    // Show success toast
-    toast.success(`Welcome back! Redirecting to your dashboard...`, {
-      duration: 2000,
-      position: 'top-center',
-      icon: '👋',
-      style: {
-        background: '#10B981',
-        color: '#fff',
-        padding: '16px',
-        borderRadius: '12px',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
-      }
-    });
+    setIsSubmitting(true);
     
-    // Redirect based on actual user role from backend
-    setTimeout(() => {
-      if (userRole === 'lecturer' || userRole === 'admin') {
-        window.location.href = '/markingSetup';
-      } else if (userRole === 'student') {
-        const userId = response.user?.id || response.id;
-        window.location.href = `/student/dashboard/${userId}`;
-      }
-    }, 2000);
-    
-  } catch (error) {
-    console.error('Login error:', error);
-    setIsSubmitting(false);
-    
-    let errorMessage = 'Login failed. Please try again.';
-    if (error instanceof Error) {
-      errorMessage = error.message;
+    try {
+      // Send only email and password - no role validation
+      const credentials = {
+        email: formData.email,
+        password: formData.password,
+        role: formData.role, // Still send role for backend processing
+        rememberMe
+      };
+
+      const response = await login(credentials);
       
-      // Handle specific error cases
-      if (error.message.includes('401')) {
-        errorMessage = 'Invalid credentials. Please check your email and password.';
+      console.log('Login successful:', response);
+      
+      if (!response.token) {
+        throw new Error('No authentication token received');
       }
+
+      // Get the user's ACTUAL role from the backend response
+      const userRole = response.user?.role || response.role;
+      if (!userRole) {
+        throw new Error('No role information received');
+      }
+
+      // Store user data and token
+      localStorage.setItem('token', response.token);
+      
+      if (response.user) {
+        localStorage.setItem('user', JSON.stringify(response.user));
+      }
+      
+      // Show success toast with the correct role
+      const roleDisplay = userRole.charAt(0).toUpperCase() + userRole.slice(1);
+      toast.success(`Welcome back, ${roleDisplay}! Redirecting to your dashboard...`, {
+        duration: 2000,
+        position: 'top-center',
+        icon: '👋',
+        style: {
+          background: '#10B981',
+          color: '#fff',
+          padding: '16px',
+          borderRadius: '12px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+        }
+      });
+      
+      // Redirect based on ACTUAL user role from backend
+      setTimeout(() => {
+        if (userRole === 'lecturer' || userRole === 'admin') {
+          window.location.href = '/markingSetup';
+        } else if (userRole === 'student') {
+          const userId = response.user?.id || response.id;
+          window.location.href = `/student/dashboard/${userId}`;
+        }
+      }, 2000);
+      
+    } catch (error) {
+      console.error('Login error:', error);
+      setIsSubmitting(false);
+      
+      let errorMessage = 'Login failed. Please try again.';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        
+        // Handle specific error cases
+        if (error.message.includes('401') || error.message.includes('Invalid credentials')) {
+          errorMessage = 'Invalid email or password. Please try again.';
+        } else if (error.message.includes('404') || error.message.includes('User not found')) {
+          errorMessage = 'No account found with this email. Please sign up first.';
+        }
+      }
+      
+      toast.error(errorMessage, {
+        duration: 4000,
+        position: 'top-center',
+        icon: '❌',
+        style: {
+          background: '#EF4444',
+          color: '#fff',
+          padding: '16px',
+          borderRadius: '12px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+        }
+      });
     }
-    
-    toast.error(errorMessage, {
-      duration: 4000,
-      position: 'top-center',
-      icon: '❌',
-      style: {
-        background: '#EF4444',
-        color: '#fff',
-        padding: '16px',
-        borderRadius: '12px',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
-      }
-    });
-  }
-};
+  };
 
   const toggleUserType = () => {
     const newRole = formData.role === 'lecturer' ? 'student' : 'lecturer';
@@ -162,6 +167,7 @@ const LoginPage = () => {
       ...prev,
       role: newRole
     }));
+    // Clear any previous errors when toggling
     setErrors({});
   };
 
