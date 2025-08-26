@@ -589,7 +589,7 @@ const SignupPage = () => {
         } focus:ring-4 placeholder-gray-400`}
       >
         <option value="">Choose your role</option>
-        <option value="100">Student</option>
+        <option value="student">Student</option>
         
       </select>
       {touched.role && formData.role && !errors.role && (
