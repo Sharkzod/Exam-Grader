@@ -61,7 +61,7 @@ const LoginPage = () => {
     setTouched(prev => ({ ...prev, [name]: true }));
   };
 
-  const handleSubmit = async () => {
+ const handleSubmit = async () => {
   if (!validateForm()) {
     toast.error('Please fill in all fields correctly', {
       position: 'top-center'
@@ -75,7 +75,7 @@ const LoginPage = () => {
     const credentials = {
       email: formData.email,
       password: formData.password,
-      role: formData.role,
+      // Remove role from credentials - backend doesn't need it
       rememberMe
     };
 
@@ -87,18 +87,10 @@ const LoginPage = () => {
       throw new Error('No authentication token received');
     }
 
-    // Verify the user's role matches the selected role
+    // Get the user's actual role from backend
     const userRole = response.user?.role || response.role;
     if (!userRole) {
       throw new Error('No role information received');
-    }
-
-    // Check for role mismatch
-    if (formData.role === 'lecturer' && userRole === 'student') {
-      throw new Error('User exists as Student');
-    }
-    if (formData.role === 'student' && userRole === 'lecturer') {
-      throw new Error('User exists as Lecturer');
     }
 
     // Store user data and token
@@ -122,7 +114,7 @@ const LoginPage = () => {
       }
     });
     
-    // Redirect based on verified role
+    // Redirect based on actual user role from backend
     setTimeout(() => {
       if (userRole === 'lecturer' || userRole === 'admin') {
         window.location.href = '/markingSetup';
@@ -143,10 +135,6 @@ const LoginPage = () => {
       // Handle specific error cases
       if (error.message.includes('401')) {
         errorMessage = 'Invalid credentials. Please check your email and password.';
-      } else if (error.message === 'User exists as Student') {
-        errorMessage = 'This account is registered as a Student. Please login using the Student option.';
-      } else if (error.message === 'User exists as Lecturer') {
-        errorMessage = 'This account is registered as a Lecturer. Please login using the Lecturer option.';
       }
     }
     
