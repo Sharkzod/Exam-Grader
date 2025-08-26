@@ -204,11 +204,12 @@ const SignupPage = () => {
   }
 };
 
-  const toggleUserType = () => {
-  setIsLecturer(!isLecturer);
+const toggleUserType = () => {
+  const newIsLecturer = formData.role === 'student';
+  setIsLecturer(newIsLecturer);
   setFormData(prev => ({
     ...prev,
-    role: !isLecturer ? 'lecturer' : 'student',
+    role: newIsLecturer ? 'lecturer' : 'student', // Use the NEW value
     level: '' // Reset level when switching
   }));
   setErrors({});
@@ -217,19 +218,18 @@ const SignupPage = () => {
   const passwordStrength = getPasswordStrength(formData.password);
   const passwordStrengthInfo = getPasswordStrengthLabel(passwordStrength);
 
-  const isFormValid = () => {
+ const isFormValid = () => {
   const baseValid = formData.fullName && 
          formData.email && 
          formData.phone && 
          formData.password && 
          formData.confirmPassword &&
          formData.department &&
-         formData.mat_no &&
          Object.keys(errors).length === 0;
   
-  // For students, also check level
+  // For students, also check level and mat_no
   if (formData.role === 'student') {
-    return baseValid && formData.level;
+    return baseValid && formData.level && formData.mat_no;
   }
   
   return baseValid;
@@ -289,12 +289,12 @@ const SignupPage = () => {
               type="button"
               onClick={() => setIsLecturer(false)}
               className={`flex-1 py-4 font-semibold flex items-center justify-center gap-3 transition-all duration-300 ${
-                !isLecturer 
+                formData.role === 'student'
                   ? 'bg-white text-blue-600 shadow-sm border-b-2 border-blue-500' 
                   : 'text-gray-600 hover:bg-white/70 hover:text-gray-800'
               }`}
             >
-              <GraduationCap className={`h-5 w-5 transition-transform ${!isLecturer ? 'scale-110' : ''}`} />
+              <GraduationCap className={`h-5 w-5 transition-transform ${formData.role === 'student' ? 'scale-110' : ''}`} />
               Student
             </button>
           </div>
@@ -425,7 +425,7 @@ const SignupPage = () => {
             </div>
 
             {/* Department */}
-{!isLecturer && (
+{formData.role === 'student' && (
 <div className="space-y-2">
   <label htmlFor="department" className="block text-sm font-semibold text-gray-700">
     Department
@@ -467,7 +467,7 @@ const SignupPage = () => {
 </div>
 )}
 
-{!isLecturer && (
+{formData.role === 'student' && (
 <div className="space-y-2">
   <label htmlFor="department" className="block text-sm font-semibold text-gray-700">
     Matriculation No:
@@ -510,7 +510,7 @@ const SignupPage = () => {
 )}
 
 {/* Level (only shown for students) */}
-{!isLecturer && (
+{formData.role === 'student' && (
   <div className="space-y-2">
     <label htmlFor="level" className="block text-sm font-semibold text-gray-700">
       Level

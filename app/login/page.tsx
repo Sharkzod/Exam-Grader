@@ -76,7 +76,6 @@ const LoginPage = () => {
   setIsSubmitting(true);
   
   try {
-    // Send only email and password - the backend determines the role
     const credentials = {
       email: formData.email,
       password: formData.password,
@@ -91,7 +90,7 @@ const LoginPage = () => {
       throw new Error('No authentication token received');
     }
 
-    // Get the user's actual role from backend response
+    // Get the user's actual role from backend - FIXED THIS LINE
     const userRole = response.user?.role;
     if (!userRole) {
       throw new Error('No role information received');
@@ -104,7 +103,7 @@ const LoginPage = () => {
       localStorage.setItem('user', JSON.stringify(response.user));
     }
     
-    // Show success toast with the correct role
+    // Show success toast with the CORRECT role from backend
     const roleDisplay = userRole.charAt(0).toUpperCase() + userRole.slice(1);
     toast.success(`Welcome back, ${roleDisplay}! Redirecting to your dashboard...`, {
       duration: 2000,
