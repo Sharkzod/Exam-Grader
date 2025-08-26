@@ -5,6 +5,8 @@ import { login } from '@/app/services/authService';
 import toast, { Toaster } from 'react-hot-toast';
 import Link from 'next/link';
 
+
+
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -75,6 +77,7 @@ const LoginPage = () => {
     const credentials = {
       email: formData.email,
       password: formData.password,
+      role: formData.role,
       // Remove role from credentials - backend doesn't need it
       rememberMe
     };
