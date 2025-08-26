@@ -1,6 +1,6 @@
 "use client";
 import { useState } from 'react';
-import { User, Lock, Mail, Phone, BookOpen, GraduationCap, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
+import { User, Lock, Mail, Phone, BookOpen, GraduationCap, Eye, EyeOff, CheckCircle, AlertCircle, Briefcase } from 'lucide-react';
 import { signup } from '@/app/services/authService';
 import toast, { Toaster } from 'react-hot-toast';
 import Link from 'next/link';
@@ -204,12 +204,11 @@ const SignupPage = () => {
   }
 };
 
-const toggleUserType = () => {
-  const newIsLecturer = formData.role === 'student';
-  setIsLecturer(newIsLecturer);
+  const toggleUserType = () => {
+  setIsLecturer(!isLecturer);
   setFormData(prev => ({
     ...prev,
-    role: newIsLecturer ? 'lecturer' : 'student', // Use the NEW value
+    role: !isLecturer ? 'lecturer' : 'student',
     level: '' // Reset level when switching
   }));
   setErrors({});
@@ -218,18 +217,19 @@ const toggleUserType = () => {
   const passwordStrength = getPasswordStrength(formData.password);
   const passwordStrengthInfo = getPasswordStrengthLabel(passwordStrength);
 
- const isFormValid = () => {
+  const isFormValid = () => {
   const baseValid = formData.fullName && 
          formData.email && 
          formData.phone && 
          formData.password && 
          formData.confirmPassword &&
          formData.department &&
+         formData.mat_no &&
          Object.keys(errors).length === 0;
   
-  // For students, also check level and mat_no
+  // For students, also check level
   if (formData.role === 'student') {
-    return baseValid && formData.level && formData.mat_no;
+    return baseValid && formData.level;
   }
   
   return baseValid;
@@ -289,12 +289,12 @@ const toggleUserType = () => {
               type="button"
               onClick={() => setIsLecturer(false)}
               className={`flex-1 py-4 font-semibold flex items-center justify-center gap-3 transition-all duration-300 ${
-                formData.role === 'student'
+                !isLecturer 
                   ? 'bg-white text-blue-600 shadow-sm border-b-2 border-blue-500' 
                   : 'text-gray-600 hover:bg-white/70 hover:text-gray-800'
               }`}
             >
-              <GraduationCap className={`h-5 w-5 transition-transform ${formData.role === 'student' ? 'scale-110' : ''}`} />
+              <GraduationCap className={`h-5 w-5 transition-transform ${!isLecturer ? 'scale-110' : ''}`} />
               Student
             </button>
           </div>
@@ -425,7 +425,7 @@ const toggleUserType = () => {
             </div>
 
             {/* Department */}
-{formData.role === 'student' && (
+{!isLecturer && (
 <div className="space-y-2">
   <label htmlFor="department" className="block text-sm font-semibold text-gray-700">
     Department
@@ -467,7 +467,7 @@ const toggleUserType = () => {
 </div>
 )}
 
-{formData.role === 'student' && (
+{!isLecturer && (
 <div className="space-y-2">
   <label htmlFor="department" className="block text-sm font-semibold text-gray-700">
     Matriculation No:
@@ -510,7 +510,7 @@ const toggleUserType = () => {
 )}
 
 {/* Level (only shown for students) */}
-{formData.role === 'student' && (
+{!isLecturer && (
   <div className="space-y-2">
     <label htmlFor="level" className="block text-sm font-semibold text-gray-700">
       Level
@@ -554,6 +554,51 @@ const toggleUserType = () => {
       )}
     </div>
     {errors.level && (
+      <div className="flex items-center gap-2 text-red-600">
+        <AlertCircle className="h-4 w-4" />
+        <p className="text-sm">{errors.level}</p>
+      </div>
+    )}
+  </div>
+)}
+
+
+{!isLecturer && (
+  <div className="space-y-2">
+    <label htmlFor="level" className="block text-sm font-semibold text-gray-700">
+      Role
+    </label>
+    <div className="relative group">
+      <div className={`absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors ${
+        errors.level ? 'text-red-400' : touched.role && formData.role ? 'text-green-400' : 'text-gray-400'
+      }`}>
+        <Briefcase className="h-5 w-5" />
+      </div>
+      <select
+        id="role"
+        name="role"
+        value={formData.role}
+        onChange={(e) => handleChange(e as any)} // TypeScript workaround
+        onBlur={handleBlur}
+        className={`pl-12 pr-4 w-full h-12 rounded-xl border-2 transition-all duration-200 bg-white appearance-none ${
+          errors.level 
+            ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' 
+            : touched.role && formData.role
+            ? 'border-green-300 focus:border-green-500 focus:ring-green-500/20'
+            : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500/20'
+        } focus:ring-4 placeholder-gray-400`}
+      >
+        <option value="">Choose your role</option>
+        <option value="100">Student</option>
+        
+      </select>
+      {touched.role && formData.role && !errors.role && (
+        <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
+          <CheckCircle className="h-5 w-5 text-green-400" />
+        </div>
+      )}
+    </div>
+    {errors.role && (
       <div className="flex items-center gap-2 text-red-600">
         <AlertCircle className="h-4 w-4" />
         <p className="text-sm">{errors.level}</p>
