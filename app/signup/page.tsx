@@ -176,7 +176,7 @@ const SignupPage = () => {
       password: '',
       confirmPassword: '',
       mat_no: '',
-      role: 'lecturer',
+      role: '',
       department: '',
       level: ''
     });
@@ -187,6 +187,7 @@ const SignupPage = () => {
     
     const errorMessage = error instanceof Error ? error.message : 'Signup failed. Please try again.';
     setApiError(errorMessage);
+    console.log('API Error Message:', errorMessage);
     
     // Show error toast
     toast.error(errorMessage, {
@@ -536,16 +537,16 @@ const SignupPage = () => {
         } focus:ring-4 placeholder-gray-400`}
       >
         <option value="">Select your level</option>
-        <option value="100">100 Level</option>
-        <option value="200">200 Level</option>
-        <option value="300">300 Level</option>
-        <option value="400">400 Level</option>
-        <option value="500">500 Level</option>
-        <option value="600">600 Level</option>
-        <option value="ND">ND</option>
+        <option value="100L">100 Level</option>
+        <option value="200L">200 Level</option>
+        <option value="300L">300 Level</option>
+        <option value="400L">400 Level</option>
+        <option value="500L">500 Level</option>
+        <option value="600L">600 Level</option>
+        {/* <option value="ND">ND</option>
         <option value="HND">HND</option>
         <option value="MSc">MSc</option>
-        <option value="PhD">PhD</option>
+        <option value="PhD">PhD</option> */}
       </select>
       {touched.level && formData.level && !errors.level && (
         <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
