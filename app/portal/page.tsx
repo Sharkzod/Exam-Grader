@@ -193,10 +193,8 @@ const StudentResultsPage = ({
   const [error, setError] = useState<string | null>(null);
   const [studentInfo, setStudentInfo] = useState<{name: string, level: string} | null>(null);
 
-  // API Configuration
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://exam-grader-bot.onrender.com';
 
-  // Fetch student results
   const fetchStudentResults = async () => {
     try {
       setLoading(true);
@@ -223,7 +221,6 @@ const StudentResultsPage = ({
         setResults(data.results);
         setFilteredResults(data.results);
         
-        // Extract student info from the first result
         if (data.results.length > 0) {
           const firstResult = data.results[0];
           setStudentInfo({

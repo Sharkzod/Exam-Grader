@@ -65,7 +65,7 @@ const LoginPage = () => {
   };
 
   // FIXED: Remove role validation entirely
- const handleSubmit = async () => {
+const handleSubmit = async () => {
   if (!validateForm()) {
     toast.error('Please fill in all fields correctly', {
       position: 'top-center'
@@ -84,26 +84,37 @@ const LoginPage = () => {
 
     const response = await login(credentials);
     
-    console.log('Login successful:', response);
+    console.log('Login successful - full response:', response);
     
     if (!response.token) {
       throw new Error('No authentication token received');
     }
 
-    // Get the user's actual role from backend - FIXED THIS LINE
-    const userRole = response.user?.role;
-    if (!userRole) {
-      throw new Error('No role information received');
-    }
-
     // Store user data and token
     localStorage.setItem('token', response.token);
     
-    if (response.user) {
-      localStorage.setItem('user', JSON.stringify(response.user));
+    // Handle different response structures - add debugging
+    const userData = response.user || response;
+    console.log('User data:', userData);
+    
+    if (userData) {
+      localStorage.setItem('user', JSON.stringify(userData));
     }
     
-    // Show success toast with the CORRECT role from backend
+    // Extract role with better debugging
+    let userRole = userData.role || userData.userType || '';
+    console.log('Raw role from backend:', userRole);
+    
+    // Normalize role to lowercase for comparison
+    userRole = userRole.toLowerCase().trim();
+    console.log('Normalized role:', userRole);
+    
+    if (!userRole) {
+      console.error('No role found in response:', userData);
+      throw new Error('No role information received');
+    }
+
+    // Show success toast
     const roleDisplay = userRole.charAt(0).toUpperCase() + userRole.slice(1);
     toast.success(`Welcome back, ${roleDisplay}! Redirecting to your dashboard...`, {
       duration: 2000,
@@ -118,13 +129,21 @@ const LoginPage = () => {
       }
     });
     
-    // Redirect based on ACTUAL user role from backend
+    // Redirect based on ACTUAL user role with better matching
     setTimeout(() => {
-      if (userRole === 'lecturer' || userRole === 'admin') {
+      console.log('Redirecting with role:', userRole);
+      
+      // Handle various role naming possibilities
+      if (userRole.includes('lecturer') || userRole.includes('user')) {
         window.location.href = '/markingSetup';
-      } else if (userRole === 'student') {
-        const userId = response.user?.id || response.id;
+      } else if(userRole.includes('student')) {
+        const userId = userData.id || userData._id || userData.userId || 'unknown';
+        console.log('Redirecting student with ID:', userId);
         window.location.href = `/student/dashboard/${userId}`;
+      // } else {
+      //   // Fallback for unknown roles - redirect to generic dashboard
+      //   console.warn('Unknown role, redirecting to default page. Role was:', userRole);
+      //   window.location.href = '/dashboard';
       }
     }, 2000);
     
@@ -140,6 +159,8 @@ const LoginPage = () => {
         errorMessage = 'Invalid email or password. Please try again.';
       } else if (error.message.includes('404') || error.message.includes('User not found')) {
         errorMessage = 'No account found with this email. Please sign up first.';
+      } else if (error.message.includes('No role information')) {
+        errorMessage = 'Account configuration error. Please contact support.';
       }
     }
     
@@ -157,7 +178,6 @@ const LoginPage = () => {
     });
   }
 };
-
   const toggleUserType = () => {
     const newRole = formData.role === 'lecturer' ? 'student' : 'lecturer';
     setFormData(prev => ({
